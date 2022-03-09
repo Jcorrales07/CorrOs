@@ -1,6 +1,5 @@
 package org.example;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -31,12 +30,12 @@ public class Administrator {
      *    String password
      *    bytes undefined ((nChars * 2) + (nChars * 2)) bytes
      */
-    public void addUsers(String username, String password) throws IOException {
-        if(unitRoot.length() == 0) { // <- If the R.A.File is empty
+    public static void addUsers(String username, String password) throws IOException {
+        if (unitRoot.length() == 0) { // <- If the R.A.File is empty
             unitRoot.seek(0); // <- Get Pointer at position 0
             unitRoot.writeUTF("Admin"); // <- Write the Admin Username
             unitRoot.writeUTF("supersecreto");  // <- Write the Password
-            this.createDIRsFor("Admin"); // <- Create Directories for the Admin
+            Administrator.createDIRsFor("Admin"); // <- Create Directories for the Admin
             unitRoot.close();
             return; // <- It ends the process
         }
@@ -46,12 +45,12 @@ public class Administrator {
             unitRoot.writeUTF(username); // <- Writes the username
             unitRoot.writeUTF(password); // <- Writes the password
 
-            this.createDIRsFor(username); // <- Create Directories for the 'Username'
+            Administrator.createDIRsFor(username); // <- Create Directories for the 'Username'
             unitRoot.close();
         } //else JOptionPane.showMessageDialog(null, "Existing account!");
     }
 
-    private void createDIRsFor(String username) {
+    private static void createDIRsFor(String username) {
         //             user = 'Z/Admin'
         File user = new File(root+"/"+username); //Creates the 'Username' subfolder in 'Z' <- Root Directory
         user.mkdir();
@@ -78,9 +77,13 @@ public class Administrator {
         while(unitRoot.getFilePointer() < unitRoot.length()) { // 10
             username = unitRoot.readUTF(); //<- leemos datos
             password = unitRoot.readUTF();
-
-            User user = new User(username, password); //<- creamos objetos tipo User
-            users.add(user); //<- se agregan a la lista
+            if(username.equals("Admin")) {
+                Admin admin = new Admin(username, password);
+                users.add(admin);
+            } else {
+                User user = new User(username, password); //<- creamos objetos tipo User
+                users.add(user); //<- se agregan a la lista
+            }
         }
         unitRoot.close(); // <- se cierra el flujo
 
@@ -95,7 +98,7 @@ public class Administrator {
 
 
     //Funcion que retorna un USUARIO
-    private static User searchUser(String username) throws IOException {
+    public static User searchUser(String username) throws IOException {
         fillArray(); //<- Tener la lista llena de lo usuarios registrados
         for(User user : Administrator.users) { // <- Recorremos la lista
             if(user.getUsername().equalsIgnoreCase(username)) {
